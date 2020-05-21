@@ -79,7 +79,7 @@ func registerQuery(m map[string]setupFunc, app *kingpin.Application) {
 		PlaceHolder("<store>").Strings()
 
 	rules := cmd.Flag("rule", "Addresses of statically configured rules API servers (repeatable). The scheme may be prefixed with 'dns+' or 'dnssrv+' to detect rule API servers through respective DNS lookups.").
-		PlaceHolder("<rule>").Strings()
+		Hidden().PlaceHolder("<rule>").Strings()
 
 	strictStores := cmd.Flag("store-strict", "Addresses of only statically configured store API servers that are always used, even if the health check fails. Useful if you have a caching layer on top.").
 		PlaceHolder("<staticstore>").Strings()

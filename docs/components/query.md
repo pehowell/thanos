@@ -328,11 +328,6 @@ Flags:
                                  prefixed with 'dns+' or 'dnssrv+' to detect
                                  store API servers through respective DNS
                                  lookups.
-      --rule=<rule> ...          Addresses of statically configured rules API
-                                 servers (repeatable). The scheme may be
-                                 prefixed with 'dns+' or 'dnssrv+' to detect
-                                 rule API servers through respective DNS
-                                 lookups.
       --store-strict=<staticstore> ...
                                  Addresses of only statically configured store
                                  API servers that are always used, even if the
