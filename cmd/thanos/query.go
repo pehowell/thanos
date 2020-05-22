@@ -55,6 +55,7 @@ func registerQuery(m map[string]setupFunc, app *kingpin.Application) {
 	key := cmd.Flag("grpc-client-tls-key", "TLS Key for the client's certificate").Default("").String()
 	caCert := cmd.Flag("grpc-client-tls-ca", "TLS CA Certificates to use to verify gRPC servers").Default("").String()
 	serverName := cmd.Flag("grpc-client-server-name", "Server name to verify the hostname on the returned gRPC certificates. See https://tools.ietf.org/html/rfc4366#section-3.1").Default("").String()
+	saFile := cmd.Flag("grpc-service-account-file", "File containing a Google service account to use to identify this client to the server").Default("").String()
 
 	webRoutePrefix := cmd.Flag("web.route-prefix", "Prefix for API and UI endpoints. This allows thanos UI to be served on a sub-path. This option is analogous to --web.route-prefix of Promethus.").Default("").String()
 	webExternalPrefix := cmd.Flag("web.external-prefix", "Static prefix for all HTML links and redirect URLs in the UI query web interface. Actual endpoints are still served on / or the web.route-prefix. This allows thanos UI to be served behind a reverse proxy that strips a URL sub-path.").Default("").String()
@@ -146,6 +147,7 @@ func registerQuery(m map[string]setupFunc, app *kingpin.Application) {
 			*key,
 			*caCert,
 			*serverName,
+			*saFile,
 			*httpBindAddr,
 			time.Duration(*httpGracePeriod),
 			*webRoutePrefix,
@@ -187,6 +189,7 @@ func runQuery(
 	key string,
 	caCert string,
 	serverName string,
+	saFile string,
 	httpBindAddr string,
 	httpGracePeriod time.Duration,
 	webRoutePrefix string,
@@ -214,7 +217,7 @@ func runQuery(
 		Help: "The number of times a duplicated store addresses is detected from the different configs in query",
 	})
 
-	dialOpts, err := extgrpc.StoreClientGRPCOpts(logger, reg, tracer, secure, cert, key, caCert, serverName)
+	dialOpts, err := extgrpc.StoreClientGRPCOpts(logger, reg, tracer, secure, cert, key, caCert, serverName, saFile)
 	if err != nil {
 		return errors.Wrap(err, "building gRPC client")
 	}

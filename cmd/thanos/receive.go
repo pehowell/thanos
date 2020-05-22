@@ -53,6 +53,7 @@ func registerReceive(m map[string]setupFunc, app *kingpin.Application) {
 	rwClientKey := cmd.Flag("remote-write.client-tls-key", "TLS Key for the client's certificate").Default("").String()
 	rwClientServerCA := cmd.Flag("remote-write.client-tls-ca", "TLS CA Certificates to use to verify servers").Default("").String()
 	rwClientServerName := cmd.Flag("remote-write.client-server-name", "Server name to verify the hostname on the returned gRPC certificates. See https://tools.ietf.org/html/rfc4366#section-3.1").Default("").String()
+	rwClientSAFile := cmd.Flag("remote-write.client-service-account-file", "File containing a Google service account to use to identify this client to the server").Default("").String()
 
 	dataDir := cmd.Flag("tsdb.path", "Data directory of TSDB.").
 		Default("./data").String()
@@ -143,6 +144,7 @@ func registerReceive(m map[string]setupFunc, app *kingpin.Application) {
 			*rwClientKey,
 			*rwClientServerCA,
 			*rwClientServerName,
+			*rwClientSAFile,
 			*dataDir,
 			objStoreConfig,
 			tsdbOpts,
@@ -181,6 +183,7 @@ func runReceive(
 	rwClientKey string,
 	rwClientServerCA string,
 	rwClientServerName string,
+	rwClientSAFile string,
 	dataDir string,
 	objStoreConfig *extflag.PathOrContent,
 	tsdbOpts *tsdb.Options,
@@ -203,7 +206,7 @@ func runReceive(
 	if err != nil {
 		return err
 	}
-	dialOpts, err := extgrpc.StoreClientGRPCOpts(logger, reg, tracer, rwServerCert != "", rwClientCert, rwClientKey, rwClientServerCA, rwClientServerName)
+	dialOpts, err := extgrpc.StoreClientGRPCOpts(logger, reg, tracer, rwServerCert != "", rwClientCert, rwClientKey, rwClientServerCA, rwClientServerName, rwClientSAFile)
 	if err != nil {
 		return err
 	}

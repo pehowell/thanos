@@ -16,10 +16,11 @@ import (
 	"github.com/thanos-io/thanos/pkg/tracing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/oauth"
 )
 
 // StoreClientGRPCOpts creates gRPC dial options for connecting to a store client.
-func StoreClientGRPCOpts(logger log.Logger, reg *prometheus.Registry, tracer opentracing.Tracer, secure bool, cert, key, caCert, serverName string) ([]grpc.DialOption, error) {
+func StoreClientGRPCOpts(logger log.Logger, reg *prometheus.Registry, tracer opentracing.Tracer, secure bool, cert, key, caCert, serverName, saFile string) ([]grpc.DialOption, error) {
 	grpcMets := grpc_prometheus.NewClientMetrics()
 	grpcMets.EnableClientHandlingTimeHistogram(
 		grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
@@ -49,6 +50,15 @@ func StoreClientGRPCOpts(logger log.Logger, reg *prometheus.Registry, tracer ope
 
 	if !secure {
 		return append(dialOpts, grpc.WithInsecure()), nil
+	}
+
+	if saFile != "" {
+		level.Info(logger).Log("msg", "enabling Google Developer service account")
+		perRpcCreds, err := oauth.NewServiceAccountFromFile(saFile)
+		if err != nil {
+			return nil, err
+		}
+		dialOpts = append(dialOpts, grpc.WithPerRPCCredentials(perRpcCreds))
 	}
 
 	level.Info(logger).Log("msg", "enabling client to server TLS")
